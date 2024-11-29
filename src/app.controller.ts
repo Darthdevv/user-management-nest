@@ -11,8 +11,4 @@ export class AppController {
     return this.appService.getHello();
   }
 
-  @Get('hello')
-  helloNest(): string {
-    return this.appService.helloNest();
-  }
 }

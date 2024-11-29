@@ -6,8 +6,4 @@ export class AppService {
   getHello(): string {
     return 'Hello World!';
   }
-
-  helloNest(): string {
-    return 'Nest says hello';
-  }
 }
