@@ -6,8 +6,8 @@ Injectable()
 export class userService {
   private readonly users: User[] = [];
 
-  signup(user: User) {
-    this.users.push(user);
+  signup() {
+    return 'signup function'
   }
 
   findAll(): User[] {

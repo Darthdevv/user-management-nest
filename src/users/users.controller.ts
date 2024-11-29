@@ -1,9 +1,11 @@
 import { Controller, Get } from "@nestjs/common";
+import { userService } from "./users.service";
 
 @Controller('users')
 export class UserController {
+  constructor(private readonly appService: userService) {}
   @Get('signup')
   signUp(): string {
-    return 'This action registers a new user';
+    return this.appService.signup();
   }
 }
