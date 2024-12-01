@@ -3,6 +3,6 @@ export interface SignUpResponse {
   data: {
     email: string;
     username: string;
-    id: string;
+    id: number;
   };
 }
