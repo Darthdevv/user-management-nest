@@ -3,12 +3,16 @@ import { IsEmail, IsInt, IsNotEmpty, IsString, Min, MinLength } from "class-vali
 export class signUpDto {
   @IsNotEmpty()
   @IsString()
-  @MinLength( 3)
+  @MinLength(3)
   username: string;
 
   @IsNotEmpty()
   @IsString()
   password: string;
+
+  @IsNotEmpty()
+  @IsString()
+  confirmPassword: string;
 
   @IsNotEmpty()
   @IsString()
