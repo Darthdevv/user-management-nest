@@ -1,4 +1,4 @@
-import { SignUpResponse } from './interfaces/signup-response.interface';
+// import { SignUpResponse } from './interfaces/signup-response.interface';
 import {  Body, Controller, Post, Query, Req, Res, UseGuards, UsePipes } from "@nestjs/common";
 import { userService } from "./users.service";
 import { Request, Response } from "express";
@@ -17,16 +17,16 @@ export class UserController {
   @Post('signup')
   @UseGuards(AuthGuard)
   @UsePipes(new ZodValidationPipe(signUpSchema))
-  signUpHandler(
+  async signUpHandler(
     @Body() body: any,
     @Query() query: object,
     @Req() req: Request,
     @Res() res: Response,
-  ): any {
+  ): Promise<Response> {
     // Log the body for debugging
     console.log('Request Body:', body); // Log the raw body
 
-    const response: SignUpResponse = this.userService.signup(body);
+    const response = await this.userService.signup(body);
 
     return res.json({
       message: response,
