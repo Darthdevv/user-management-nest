@@ -1,10 +1,11 @@
 import { SignUpResponse } from './interfaces/signup-response.interface';
-import {  Body, Controller, Post, Query, Req, Res, UsePipes } from "@nestjs/common";
+import {  Body, Controller, Post, Query, Req, Res, UseGuards, UsePipes } from "@nestjs/common";
 import { userService } from "./users.service";
 import { Request, Response } from "express";
 // import { signUpDto } from "./dto/signup-user.dto";
 import { ZodValidationPipe } from './pipes/zodValidationPipe';
 import { signUpSchema } from './dto/signup-userZod.dto';
+import { AuthGuard } from 'src/guards/auth.guard';
 
 
 
@@ -14,6 +15,7 @@ export class UserController {
   constructor(private readonly userService: userService) {}
 
   @Post('signup')
+  @UseGuards(AuthGuard)
   @UsePipes(new ZodValidationPipe(signUpSchema))
   signUpHandler(
     @Body() body: any,
