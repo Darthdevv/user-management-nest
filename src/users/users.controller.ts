@@ -1,35 +1,23 @@
-// import { SignUpResponse } from './interfaces/signup-response.interface';
-import {  Body, Controller, Post, Query, Req, Res, UseGuards, UsePipes } from "@nestjs/common";
-import { userService } from "./users.service";
-import { Request, Response } from "express";
-// import { signUpDto } from "./dto/signup-user.dto";
+import { Body, Controller, Post, UsePipes } from '@nestjs/common';
+import { UserService } from './users.service';
+import { CreateUserDto } from './dto/signup-userZod.dto';
 import { ZodValidationPipe } from './pipes/zodValidationPipe';
 import { signUpSchema } from './dto/signup-userZod.dto';
-import { AuthGuard } from 'src/guards/auth.guard';
-
-
-
 
 @Controller('users')
 export class UserController {
-  constructor(private readonly userService: userService) {}
+  constructor(private readonly userService: UserService) {}
 
   @Post('signup')
-  @UseGuards(AuthGuard)
   @UsePipes(new ZodValidationPipe(signUpSchema))
   async signUpHandler(
-    @Body() body: any,
-    @Query() query: object,
-    @Req() req: Request,
-    @Res() res: Response,
-  ): Promise<Response> {
-    // Log the body for debugging
-    console.log('Request Body:', body); // Log the raw body
-
+    @Body() body: CreateUserDto,
+  ): Promise<{ message: string; data: any }> {
     const response = await this.userService.signup(body);
 
-    return res.json({
-      message: response,
-    });
+    return {
+      message: response.message,
+      data: response.data,
+    };
   }
 }

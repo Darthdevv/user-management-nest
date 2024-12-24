@@ -1,45 +1,44 @@
 import { InjectModel } from '@nestjs/mongoose';
 import { CreateUserDto } from './dto/signup-userZod.dto';
-// import { signUpDto } from '../users/dto/signup-user.dto';
 import { SignUpResponse } from './interfaces/signup-response.interface';
-import { BadRequestException, ConflictException, Injectable } from "@nestjs/common";
-import { User } from './schemas/user.schema';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+} from '@nestjs/common';
+import { User, UserDocument } from './schemas/user.schema';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 
-
-
-// eslint-disable-next-line prefer-const
-let users : any = [];
-Injectable()
-export class userService {
-
-  constructor(@InjectModel(User.name) private userModel: Model<User>) { }
+@Injectable()
+export class UserService {
+  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async signup(body: CreateUserDto): Promise<SignUpResponse> {
     const { username, email, password, confirmPassword, age } = body;
 
-    const isEmailExist = await this.userModel.findOne(
-      (user: { email: string }) => user.email === email,
-    );
+    // Check if email already exists
+    const isEmailExist = await this.userModel.findOne({ email });
     if (isEmailExist) {
-      throw new ConflictException(' Email already exists');
+      throw new ConflictException('Email already exists');
     }
 
-    const isUsernameExist: string | undefined = users.find(
-      (user: { username: string }) => user.username === username,
-    );
+    // Check if username already exists
+    const isUsernameExist = await this.userModel.findOne({ username });
     if (isUsernameExist) {
       throw new ConflictException('Username already exists');
     }
 
+    // Validate password match
     if (password !== confirmPassword) {
       throw new BadRequestException('Passwords do not match');
     }
 
+    // Hash the password
     const saltRounds = 10;
-    const hashedPassword = bcrypt.hashSync(password, saltRounds);
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
 
+    // Create and save the user
     const newUser = new this.userModel({
       username,
       email,
@@ -47,14 +46,15 @@ export class userService {
       age,
     });
 
-    users.push(newUser);
+    const savedUser = await newUser.save();
 
+    // Construct the response
     const response: SignUpResponse = {
       message: 'User registered successfully',
       data: {
         email,
         username,
-        id: users.length,
+        id: savedUser._id, // Use MongoDB ID
       },
     };
 
