@@ -1,18 +1,26 @@
 import { InjectModel } from '@nestjs/mongoose';
-import { CreateUserDto } from './dto/signup-userZod.dto';
-import { SignUpResponse } from './interfaces/signup-response.interface';
+import { CreateUserDto, logInDto } from './dto/auth-userZod.dto';
+import {
+  SignInResponse,
+  SignUpResponse,
+} from './interfaces/auth-response.interface';
 import {
   BadRequestException,
   ConflictException,
   Injectable,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { User, UserDocument } from './schemas/user.schema';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
+  constructor(
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    private jwtService: JwtService,
+  ) {}
 
   async signup(body: CreateUserDto): Promise<SignUpResponse> {
     const { username, email, password, confirmPassword, age } = body;
@@ -55,6 +63,39 @@ export class UserService {
         email,
         username,
         id: savedUser._id, // Use MongoDB ID
+      },
+    };
+
+    return response;
+  }
+
+  async signin(body: logInDto): Promise<SignInResponse> {
+    const { email, password } = body;
+
+    // Find user by email
+    const user = await this.userModel.findOne({ email });
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials.');
+    }
+
+    // Compare passwords
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    // Generate JWT Token
+    const payload = { username: user.username, sub: user._id };
+    const token = this.jwtService.sign(payload);
+
+    // Construct the response
+    const response: SignInResponse = {
+      message: 'Sign in successful',
+      data: {
+        role: user.role,
+        username: user.username,
+        id: user._id,
+        token,
       },
     };
 

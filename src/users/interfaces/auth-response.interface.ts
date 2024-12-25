@@ -8,3 +8,13 @@ export interface SignUpResponse {
     id: Types.ObjectId;
   };
 }
+
+export interface SignInResponse{
+  message: string;
+  data: {
+    role: string;
+    id: Types.ObjectId;
+    username: string;
+    token: string;
+  };
+}

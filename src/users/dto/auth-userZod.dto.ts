@@ -13,4 +13,10 @@ export const signUpSchema = z
     path: ['confirmPassword'],
   });
 
+export const signInSchema = z.object({
+  email: z.string().email('Invalid email format'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+});
+
+export type logInDto = z.infer<typeof signInSchema>;
 export type CreateUserDto = z.infer<typeof signUpSchema>;
